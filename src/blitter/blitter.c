@@ -362,14 +362,14 @@ gboolean gst_imx_blitter_fill_region(GstImxBlitter *blitter, GstImxRegion const 
 }
 
 
-gboolean gst_imx_blitter_blit(GstImxBlitter *blitter, guint8 alpha)
+gboolean gst_imx_blitter_blit(GstImxBlitter *blitter, guint8 global_alpha, gboolean local_alpha)
 {
 	GstImxBlitterClass *klass;
 	g_assert(blitter != NULL);
 	klass = GST_IMX_BLITTER_CLASS(G_OBJECT_GET_CLASS(blitter));
 
 	g_assert(klass->blit != NULL);
-	return klass->blit(blitter, alpha);
+	return klass->blit(blitter, global_alpha, local_alpha);
 }
 
 
