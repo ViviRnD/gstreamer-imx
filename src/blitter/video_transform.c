@@ -1347,7 +1347,7 @@ static GstFlowReturn gst_imx_blitter_video_transform_transform_frame(GstBaseTran
 		ret = FALSE;
 	}
 
-	if (ret && !gst_imx_blitter_blit(blitter_video_transform->blitter, 255))
+	if (ret && !gst_imx_blitter_blit(blitter_video_transform->blitter, 255, FALSE))
 	{
 		GST_ERROR_OBJECT(transform, "blitting operation failed");
 		ret = FALSE;

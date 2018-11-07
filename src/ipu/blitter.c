@@ -61,7 +61,7 @@ static gboolean gst_imx_ipu_blitter_set_output_frame(GstImxBlitter *blitter, Gst
 static GstAllocator* gst_imx_ipu_blitter_get_phys_mem_allocator(GstImxBlitter *blitter);
 
 static gboolean gst_imx_ipu_blitter_fill_region(GstImxBlitter *blitter, GstImxRegion const *region, guint32 color);
-static gboolean gst_imx_ipu_blitter_blit(GstImxBlitter *blitter, guint8 alpha);
+static gboolean gst_imx_ipu_blitter_blit(GstImxBlitter *blitter, guint8 global_alpha, gboolean local_alpha);
 
 static void gst_imx_ipu_blitter_set_task_params(GstImxIpuBlitter *ipu_blitter, GstBuffer *video_frame, struct ipu_task *task, GstVideoInfo const *info, gboolean is_input);
 static gboolean gst_imx_ipu_blitter_allocate_internal_fill_frame(GstImxIpuBlitter *ipu_blitter);
@@ -438,7 +438,7 @@ static gboolean gst_imx_ipu_blitter_fill_region(GstImxBlitter *blitter, GstImxRe
 }
 
 
-static gboolean gst_imx_ipu_blitter_blit(GstImxBlitter *blitter, guint8 alpha)
+static gboolean gst_imx_ipu_blitter_blit(GstImxBlitter *blitter, guint8 global_alpha, gboolean local_alpha)
 {
 	gboolean ret = TRUE;
 	GstImxIpuBlitter *ipu_blitter = GST_IMX_IPU_BLITTER(blitter);

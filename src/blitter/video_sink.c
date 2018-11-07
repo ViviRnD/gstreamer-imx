@@ -963,7 +963,7 @@ static GstFlowReturn gst_imx_blitter_video_sink_show_frame(GstVideoSink *video_s
 		gst_imx_blitter_video_sink_select_fb_page(blitter_video_sink, blitter_video_sink->old_fb_page);
 
 		/* The actual blitting */
-		gst_imx_blitter_blit(blitter_video_sink->blitter, 255);
+		gst_imx_blitter_blit(blitter_video_sink->blitter, 255, FALSE);
 		/* Flush the blitter to make sure it does not use any cached output
 		 * information (for example, the physical address of the previously
 		 * selected fb page) */
@@ -980,7 +980,7 @@ static GstFlowReturn gst_imx_blitter_video_sink_show_frame(GstVideoSink *video_s
 	}
 	else
 	{
-		gst_imx_blitter_blit(blitter_video_sink->blitter, 255);
+		gst_imx_blitter_blit(blitter_video_sink->blitter, 255, FALSE);
 	}
 
 	GST_IMX_BLITTER_VIDEO_SINK_UNLOCK(blitter_video_sink);
