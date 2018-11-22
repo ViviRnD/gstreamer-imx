@@ -181,7 +181,7 @@ struct _GstImxBlitterClass
 	GstAllocator* (*get_phys_mem_allocator)(GstImxBlitter *blitter);
 
 	gboolean (*fill_region)(GstImxBlitter *blitter, GstImxRegion const *region, guint32 color);
-	gboolean (*blit)(GstImxBlitter *blitter, guint8 alpha);
+	gboolean (*blit)(GstImxBlitter *blitter, guint8 global_alpha, gboolean local_alpha);
 	void (*flush)(GstImxBlitter *blitter);
 };
 
@@ -278,7 +278,7 @@ gboolean gst_imx_blitter_fill_region(GstImxBlitter *blitter, GstImxRegion const 
  * Internally, this calls the @blit vfunc, and returns its return value.
  * See its documentation for details.
  */
-gboolean gst_imx_blitter_blit(GstImxBlitter *blitter, guint8 alpha);
+gboolean gst_imx_blitter_blit(GstImxBlitter *blitter, guint8 global_alpha, gboolean local_alpha);
 /* Flush any temporary and/or cached data in the blitter.
  *
  * Internally, this calls the @flush vfunc if defined. See its documentation for details.

@@ -54,7 +54,7 @@ static gboolean gst_imx_g2d_blitter_set_output_frame(GstImxBlitter *blitter, Gst
 static GstAllocator* gst_imx_g2d_blitter_get_phys_mem_allocator(GstImxBlitter *blitter);
 
 static gboolean gst_imx_g2d_blitter_fill_region(GstImxBlitter *blitter, GstImxRegion const *region, guint32 color);
-static gboolean gst_imx_g2d_blitter_blit(GstImxBlitter *blitter, guint8 alpha);
+static gboolean gst_imx_g2d_blitter_blit(GstImxBlitter *blitter, guint8 global_alpha, gboolean local_alpha);
 
 static gboolean gst_imx_g2d_blitter_allocate_internal_fill_frame(GstImxG2DBlitter *g2d_blitter);
 static gboolean gst_imx_g2d_blitter_set_surface_params(GstImxG2DBlitter *g2d_blitter, GstBuffer *video_frame, struct g2d_surface *surface, GstVideoInfo const *info);
@@ -277,7 +277,7 @@ static gboolean gst_imx_g2d_blitter_fill_region(GstImxBlitter *blitter, GstImxRe
 		return FALSE;
 	}
 
-	g2d_blitter->background_surface.clrcolor = color | 0xFF000000;
+	g2d_blitter->background_surface.clrcolor = color;
 	g2d_blitter->background_surface.left   = region->x1;
 	g2d_blitter->background_surface.top    = region->y1;
 	g2d_blitter->background_surface.right  = region->x2;
@@ -308,7 +308,7 @@ static gboolean gst_imx_g2d_blitter_fill_region(GstImxBlitter *blitter, GstImxRe
 }
 
 
-static gboolean gst_imx_g2d_blitter_blit(GstImxBlitter *blitter, guint8 alpha)
+static gboolean gst_imx_g2d_blitter_blit(GstImxBlitter *blitter, guint8 global_alpha, gboolean local_alpha)
 {
 	guint i;
 	gboolean ret = TRUE;
@@ -316,7 +316,7 @@ static gboolean gst_imx_g2d_blitter_blit(GstImxBlitter *blitter, guint8 alpha)
 
 	/* Don't do anything if the canvas is not visible or
 	 * if alpha is 0 (which means 100% transparent) */
-	if ((g2d_blitter->visibility_mask == 0) || (alpha == 0))
+	if ((g2d_blitter->visibility_mask == 0) || (global_alpha == 0))
 		return TRUE;
 
 	if (g2d_open(&(g2d_blitter->handle)) != 0)
@@ -338,13 +338,13 @@ static gboolean gst_imx_g2d_blitter_blit(GstImxBlitter *blitter, guint8 alpha)
 	 * per-pixel blending (the total alpha is the multiplicative combination
 	 * of both global and per-pixel alpha).
 	 */
-	if ((alpha != 255) || gst_imx_g2d_blitter_g2d_format_has_alpha_channel(g2d_blitter->input_surface.format))
+	if ((global_alpha != 255) || (local_alpha && gst_imx_g2d_blitter_g2d_format_has_alpha_channel(g2d_blitter->input_surface.format)))
 	{
 		g2d_enable(g2d_blitter->handle, G2D_BLEND);
 		/* If blending shall be used because the input has an alpha
 		 * channel & the global alpah is 255, then it is unnecessary
 		 * to enable global alpha */
-		if (alpha == 255)
+		if (global_alpha == 255)
 			g2d_disable(g2d_blitter->handle, G2D_GLOBAL_ALPHA);
 		else
 			g2d_enable(g2d_blitter->handle, G2D_GLOBAL_ALPHA);
@@ -365,7 +365,7 @@ static gboolean gst_imx_g2d_blitter_blit(GstImxBlitter *blitter, guint8 alpha)
 		empty_surf->right  = g2d_blitter->empty_regions[i].x2;
 		empty_surf->bottom = g2d_blitter->empty_regions[i].y2;
 
-		empty_alpha = ((g2d_blitter->fill_color >> 24) * (guint)alpha) / 255;
+		empty_alpha = ((g2d_blitter->fill_color >> 24) * (guint)global_alpha) / 255;
 
 		/* g2d_clear() ignores alpha blending, so if empty_alpha is not 255,
 		 * use a trick. Take the fill_surface, which is a very small surface,
@@ -412,9 +412,9 @@ static gboolean gst_imx_g2d_blitter_blit(GstImxBlitter *blitter, guint8 alpha)
 	if (ret && (g2d_blitter->visibility_mask & GST_IMX_CANVAS_VISIBILITY_FLAG_REGION_INNER))
 	{
 		g2d_blitter->input_surface.blendfunc = G2D_SRC_ALPHA;
-		g2d_blitter->input_surface.global_alpha = alpha;
+		g2d_blitter->input_surface.global_alpha = global_alpha;
 		g2d_blitter->output_surface.blendfunc = G2D_ONE_MINUS_SRC_ALPHA;
-		g2d_blitter->output_surface.global_alpha = alpha;
+		g2d_blitter->output_surface.global_alpha = global_alpha;
 
 		GST_DEBUG_OBJECT(g2d_blitter, "input_surface: %d %d %d %d", g2d_blitter->input_surface.left, g2d_blitter->input_surface.top, g2d_blitter->input_surface.right, g2d_blitter->input_surface.bottom);
 		GST_DEBUG_OBJECT(g2d_blitter, "output_surface: %d %d %d %d", g2d_blitter->output_surface.left, g2d_blitter->output_surface.top, g2d_blitter->output_surface.right, g2d_blitter->output_surface.bottom);

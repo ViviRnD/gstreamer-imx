@@ -179,7 +179,7 @@ gboolean gst_imx_blitter_compositor_draw_frame(GstImxVideoCompositor *compositor
 	ret = ret && gst_imx_blitter_set_input_frame_and_cache(blitter_compositor->blitter, input_frame);
 	ret = ret && gst_imx_blitter_set_output_canvas(blitter_compositor->blitter, output_canvas);
 
-	ret = ret && gst_imx_blitter_blit(blitter_compositor->blitter, alpha);
+	ret = ret && gst_imx_blitter_blit(blitter_compositor->blitter, alpha, TRUE);
 
 	return ret;
 }
