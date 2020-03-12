@@ -1197,7 +1197,7 @@ static gboolean gst_imx_blitter_video_sink_clear_fb_pages(GstImxBlitterVideoSink
 	for (i = 0; i < num_pages; ++i)
 	{
 		gst_imx_blitter_video_sink_select_fb_page(blitter_video_sink, i);
-		gst_imx_blitter_fill_region(blitter_video_sink->blitter, &(blitter_video_sink->framebuffer_region), 0x00000000);
+		gst_imx_blitter_fill_region(blitter_video_sink->blitter, &(blitter_video_sink->canvas.outer_region), 0x00000000);
 	}
 
 	phys_mem_meta->phys_addr = prev_phys_addr;
